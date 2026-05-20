@@ -1,1 +1,1404 @@
 # vidforge-ai.
+import { useState, useEffect, useRef } from "react";
+
+const NAV_ITEMS = [
+  { id: "dashboard", icon: "⬡", label: "Dashboard" },
+  { id: "create", icon: "✦", label: "Create Video" },
+  { id: "scripts", icon: "◈", label: "AI Scripts" },
+  { id: "voiceovers", icon: "◎", label: "Voiceovers" },
+  { id: "media", icon: "▣", label: "Media Library" },
+  { id: "templates", icon: "◫", label: "Templates" },
+  { id: "queue", icon: "⊞", label: "Rendering Queue" },
+  { id: "exports", icon: "⬡", label: "Exports" },
+  { id: "settings", icon: "◉", label: "Settings" },
+];
+
+const TEMPLATES = [
+  { id: 1, name: "Sports Documentary", tag: "🏆", color: "#ff6b35", views: "2.4M", style: "cinematic" },
+  { id: 2, name: "UFC Highlights", tag: "🥊", color: "#e63946", views: "5.1M", style: "fast-cut" },
+  { id: 3, name: "Motivation Reel", tag: "⚡", color: "#f4a261", views: "3.8M", style: "energetic" },
+  { id: 4, name: "AI News Report", tag: "🤖", color: "#457b9d", views: "1.9M", style: "anchor" },
+  { id: 5, name: "Finance Shorts", tag: "💹", color: "#2a9d8f", views: "4.2M", style: "documentary" },
+  { id: 6, name: "Crime Stories", tag: "🔍", color: "#9b2335", views: "6.7M", style: "horror" },
+];
+
+const VOICE_STYLES = ["Deep Cinematic", "News Anchor", "Energetic", "Emotional", "Sports Hype", "Calm Documentary"];
+const LANGUAGES = ["English", "Urdu", "Hindi", "Arabic"];
+const VIDEO_TYPES = [
+  { id: "shorts", label: "YouTube Shorts", ratio: "9:16", icon: "▲", color: "#ff0000" },
+  { id: "tiktok", label: "TikTok", ratio: "9:16", icon: "◈", color: "#69c9d0" },
+  { id: "reels", label: "Instagram Reels", ratio: "9:16", icon: "◎", color: "#c13584" },
+  { id: "youtube", label: "Long-form YouTube", ratio: "16:9", icon: "⬡", color: "#ff0000" },
+];
+
+function Particles() {
+  return (
+    <div className="particles">
+      {[...Array(18)].map((_, i) => (
+        <div key={i} className={`particle particle-${i}`} />
+      ))}
+    </div>
+  );
+}
+
+function StatCard({ label, value, change, color }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-glow" style={{ background: color }} />
+      <div className="stat-label">{label}</div>
+      <div className="stat-value" style={{ color }}>{value}</div>
+      <div className="stat-change">
+        <span className="change-up">↑ {change}</span> this week
+      </div>
+    </div>
+  );
+}
+
+function ProgressBar({ label, value, color }) {
+  return (
+    <div className="progress-row">
+      <span className="progress-label">{label}</span>
+      <div className="progress-track">
+        <div className="progress-fill" style={{ width: `${value}%`, background: color }} />
+      </div>
+      <span className="progress-val">{value}%</span>
+    </div>
+  );
+}
+
+function Dashboard() {
+  const [animStep, setAnimStep] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimStep(1), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className={`page-content ${animStep ? "visible" : ""}`}>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Command Center</h1>
+          <p className="page-sub">Your AI video empire at a glance</p>
+        </div>
+        <button className="btn-primary" onClick={() => {}}>
+          <span>✦</span> New Video
+        </button>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard label="Videos Generated" value="2,847" change="234" color="#a78bfa" />
+        <StatCard label="Total Views" value="18.4M" change="2.1M" color="#34d399" />
+        <StatCard label="Credits Used" value="12,450" change="1,840" color="#60a5fa" />
+        <StatCard label="Exports Ready" value="47" change="12" color="#f59e0b" />
+      </div>
+
+      <div className="dashboard-grid">
+        <div className="card recent-projects">
+          <div className="card-header">
+            <h3>Recent Projects</h3>
+            <span className="badge">Live</span>
+          </div>
+          {[
+            { name: "Top 10 AI Moments 2024", status: "rendering", progress: 72, type: "YouTube" },
+            { name: "UFC Fighter Origins", status: "complete", progress: 100, type: "Shorts" },
+            { name: "Finance Tips for Gen Z", status: "complete", progress: 100, type: "TikTok" },
+            { name: "Space Discoveries 2024", status: "queued", progress: 0, type: "Reels" },
+          ].map((p, i) => (
+            <div key={i} className="project-row">
+              <div className="project-info">
+                <div className="project-name">{p.name}</div>
+                <div className="project-meta">
+                  <span className="platform-tag">{p.type}</span>
+                  <span className={`status-badge status-${p.status}`}>{p.status}</span>
+                </div>
+              </div>
+              {p.status === "rendering" && (
+                <div className="mini-progress">
+                  <div className="mini-fill" style={{ width: `${p.progress}%` }} />
+                  <span>{p.progress}%</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="card analytics-card">
+          <div className="card-header">
+            <h3>Performance</h3>
+          </div>
+          <ProgressBar label="Hook Strength" value={87} color="#a78bfa" />
+          <ProgressBar label="Retention Score" value={74} color="#34d399" />
+          <ProgressBar label="Engagement Rate" value={62} color="#60a5fa" />
+          <ProgressBar label="SEO Score" value={91} color="#f59e0b" />
+          <div className="credits-display">
+            <div className="credits-label">Credits Remaining</div>
+            <div className="credits-bar">
+              <div className="credits-fill" style={{ width: "67%" }} />
+            </div>
+            <div className="credits-nums">
+              <span className="credits-used">3,350 used</span>
+              <span className="credits-total">5,000 total</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="card queue-card">
+          <div className="card-header">
+            <h3>Render Queue</h3>
+            <span className="badge badge-active">3 Active</span>
+          </div>
+          {[
+            { name: "Sports Reel #7", time: "2:34 left", percent: 72 },
+            { name: "AI Documentary", time: "8:12 left", percent: 31 },
+            { name: "Motivation Clip", time: "Queued", percent: 0 },
+          ].map((q, i) => (
+            <div key={i} className="queue-item">
+              <div className="queue-name">{q.name}</div>
+              <div className="queue-time">{q.time}</div>
+              <div className="queue-track">
+                <div className="queue-fill" style={{ width: `${q.percent}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CreateVideo({ onNavigate }) {
+  const [step, setStep] = useState(1);
+  const [videoType, setVideoType] = useState(null);
+  const [inputMethod, setInputMethod] = useState(null);
+  const [topic, setTopic] = useState("");
+  const [script, setScript] = useState("");
+  const [tone, setTone] = useState("Cinematic");
+  const [duration, setDuration] = useState("60");
+  const [language, setLanguage] = useState("English");
+  const [voiceStyle, setVoiceStyle] = useState("Deep Cinematic");
+  const [generating, setGenerating] = useState(false);
+  const [generated, setGenerated] = useState(false);
+  const [genProgress, setGenProgress] = useState(0);
+  const [genStage, setGenStage] = useState("");
+  const [generatedScript, setGeneratedScript] = useState("");
+
+  const STAGES = [
+    "Analyzing prompt...",
+    "Writing viral script...",
+    "Breaking into scenes...",
+    "Selecting visuals...",
+    "Generating voiceover...",
+    "Syncing subtitles...",
+    "Adding transitions...",
+    "Rendering final video...",
+  ];
+
+  const handleGenerate = async () => {
+    if (!topic && !script) return;
+    setGenerating(true);
+    setGenProgress(0);
+
+    const prompt = `Write a viral ${tone} style video script about: "${topic || "the provided script"}". 
+Format it as 5 scenes with hooks, narration, and a strong CTA. Keep it engaging for ${duration} seconds. Language: ${language}.
+Make it punchy, emotional, and scroll-stopping.`;
+
+    let stageIdx = 0;
+    const stageInterval = setInterval(() => {
+      if (stageIdx < STAGES.length - 1) {
+        stageIdx++;
+        setGenStage(STAGES[stageIdx]);
+        setGenProgress(Math.min((stageIdx / (STAGES.length - 1)) * 85, 85));
+      }
+    }, 800);
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data = await response.json();
+      clearInterval(stageInterval);
+      setGenProgress(100);
+      setGenStage("Video ready!");
+      const text = data.content?.map(b => b.text || "").join("") || "Script generated successfully.";
+      setGeneratedScript(text);
+      setTimeout(() => { setGenerating(false); setGenerated(true); }, 500);
+    } catch {
+      clearInterval(stageInterval);
+      setGenerating(false);
+      setGeneratedScript("⚡ AI Script Generated!\n\n[SCENE 1 - HOOK]\nDid you know that 90% of people fail at this one thing...\n\n[SCENE 2 - STORY]\nThe secret the top 1% don't want you to know...\n\n[SCENE 3 - VALUE]\nHere's exactly what you need to do...\n\n[SCENE 4 - PROOF]\nMillions have already used this method...\n\n[SCENE 5 - CTA]\nFollow for more secrets like this!");
+      setGenerated(true);
+    }
+  };
+
+  if (generating) {
+    return (
+      <div className="page-content visible">
+        <div className="generating-screen">
+          <div className="gen-orb" />
+          <div className="gen-title">AI is Creating Your Video</div>
+          <div className="gen-stage">{genStage || STAGES[0]}</div>
+          <div className="gen-progress-track">
+            <div className="gen-progress-fill" style={{ width: `${genProgress}%` }} />
+          </div>
+          <div className="gen-percent">{Math.round(genProgress)}%</div>
+          <div className="gen-steps">
+            {STAGES.map((s, i) => (
+              <div key={i} className={`gen-step ${genProgress >= (i / (STAGES.length - 1)) * 100 ? "done" : ""}`}>
+                <span className="gen-dot" />{s}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (generated) {
+    return (
+      <div className="page-content visible">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">✦ Video Generated!</h1>
+            <p className="page-sub">Your AI video is ready to export</p>
+          </div>
+          <div className="btn-row">
+            <button className="btn-secondary" onClick={() => { setGenerated(false); setStep(1); setVideoType(null); setInputMethod(null); setTopic(""); setScript(""); }}>New Video</button>
+            <button className="btn-primary">Export MP4</button>
+          </div>
+        </div>
+        <div className="result-grid">
+          <div className="card result-preview">
+            <div className="video-preview-box">
+              <div className="video-preview-inner">
+                <div className="preview-play">▶</div>
+                <div className="preview-label">Preview Ready</div>
+                <div className="preview-duration">{duration}s • {videoType?.label || "Shorts"}</div>
+              </div>
+              <div className="preview-scenes">
+                {[1,2,3,4,5].map(n => (
+                  <div key={n} className="scene-thumb">
+                    <div className="scene-num">Scene {n}</div>
+                    <div className="scene-bar"><div className="scene-bar-fill" style={{ width: `${60+n*7}%` }} /></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="card result-script">
+            <div className="card-header"><h3>Generated Script</h3><span className="badge">AI</span></div>
+            <div className="script-output">{generatedScript}</div>
+            <div className="export-options">
+              <div className="export-row">
+                <span>Format</span>
+                <div className="select-row">
+                  {["MP4", "MOV", "WebM"].map(f => <button key={f} className="fmt-btn">{f}</button>)}
+                </div>
+              </div>
+              <div className="export-row">
+                <span>Quality</span>
+                <div className="select-row">
+                  {["1080p", "4K", "720p"].map(q => <button key={q} className="fmt-btn">{q}</button>)}
+                </div>
+              </div>
+              <div className="export-row">
+                <span>FPS</span>
+                <div className="select-row">
+                  {["30fps", "60fps"].map(f => <button key={f} className="fmt-btn">{f}</button>)}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="card seo-card">
+            <div className="card-header"><h3>SEO Package</h3><span className="badge">Auto</span></div>
+            <div className="seo-item"><div className="seo-key">Title</div><div className="seo-val">You Won't Believe What AI Can Do Now... 🤯</div></div>
+            <div className="seo-item"><div className="seo-key">Tags</div><div className="tags-row">{["#viral","#ai","#shorts","#trending","#fyp"].map(t=><span key={t} className="tag">{t}</span>)}</div></div>
+            <div className="seo-item"><div className="seo-key">Hook Score</div><div className="hook-score">94/100 🔥</div></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-content visible">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Create Video</h1>
+          <p className="page-sub">Step {step} of 3 — {["Choose Type", "Input Method", "Generate"][step-1]}</p>
+        </div>
+        <div className="steps-indicator">
+          {[1,2,3].map(s => <div key={s} className={`step-dot ${step >= s ? "active" : ""}`}>{s}</div>)}
+        </div>
+      </div>
+
+      {step === 1 && (
+        <div>
+          <h2 className="section-title">Choose Video Format</h2>
+          <div className="type-grid">
+            {VIDEO_TYPES.map(vt => (
+              <div key={vt.id} className={`type-card ${videoType?.id === vt.id ? "selected" : ""}`}
+                onClick={() => setVideoType(vt)}>
+                <div className="type-icon" style={{ color: vt.color }}>{vt.icon}</div>
+                <div className="type-name">{vt.label}</div>
+                <div className="type-ratio">{vt.ratio}</div>
+                {videoType?.id === vt.id && <div className="type-check">✓</div>}
+              </div>
+            ))}
+          </div>
+          <button className="btn-primary btn-next" disabled={!videoType} onClick={() => setStep(2)}>Continue →</button>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div>
+          <h2 className="section-title">Choose Input Method</h2>
+          <div className="input-methods">
+            {[
+              { id: "topic", icon: "✦", label: "Topic Prompt", desc: "Enter a topic and let AI do everything" },
+              { id: "script", icon: "◈", label: "Custom Script", desc: "Paste your own script" },
+              { id: "voiceover", icon: "◎", label: "Voiceover Upload", desc: "Upload audio and AI generates visuals" },
+              { id: "youtube", icon: "▲", label: "YouTube Link", desc: "Transform any YouTube video" },
+              { id: "tiktok", icon: "◉", label: "TikTok / Reels", desc: "Remix TikTok or Instagram content" },
+            ].map(m => (
+              <div key={m.id} className={`method-card ${inputMethod === m.id ? "selected" : ""}`}
+                onClick={() => setInputMethod(m.id)}>
+                <span className="method-icon">{m.icon}</span>
+                <div>
+                  <div className="method-name">{m.label}</div>
+                  <div className="method-desc">{m.desc}</div>
+                </div>
+                {inputMethod === m.id && <span className="method-check">✓</span>}
+              </div>
+            ))}
+          </div>
+
+          {inputMethod === "topic" && (
+            <div className="input-form">
+              <div className="form-row">
+                <label>Topic</label>
+                <input className="form-input" placeholder="e.g. Top 10 AI breakthroughs of 2024" value={topic} onChange={e=>setTopic(e.target.value)} />
+              </div>
+              <div className="form-grid-2">
+                <div className="form-row">
+                  <label>Style</label>
+                  <select className="form-select" value={tone} onChange={e=>setTone(e.target.value)}>
+                    {["Cinematic","MrBeast","Documentary","Sports","Horror","Motivation","Finance","News"].map(s=><option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Duration (seconds)</label>
+                  <select className="form-select" value={duration} onChange={e=>setDuration(e.target.value)}>
+                    {["30","60","90","180","300","600"].map(d=><option key={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Voice Style</label>
+                  <select className="form-select" value={voiceStyle} onChange={e=>setVoiceStyle(e.target.value)}>
+                    {VOICE_STYLES.map(v=><option key={v}>{v}</option>)}
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Language</label>
+                  <select className="form-select" value={language} onChange={e=>setLanguage(e.target.value)}>
+                    {LANGUAGES.map(l=><option key={l}>{l}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {inputMethod === "script" && (
+            <div className="input-form">
+              <div className="form-row">
+                <label>Your Script</label>
+                <textarea className="form-textarea" rows={8} placeholder="Paste your script here..." value={script} onChange={e=>setScript(e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {inputMethod === "voiceover" && (
+            <div className="input-form">
+              <div className="upload-zone">
+                <div className="upload-icon">🎙</div>
+                <div className="upload-text">Drop your voiceover audio here</div>
+                <div className="upload-sub">MP3, WAV, M4A up to 500MB</div>
+                <button className="btn-secondary">Browse Files</button>
+              </div>
+              <div className="info-box">AI will analyze timing, detect pauses, generate matching visuals, and auto-sync subtitles to your narration.</div>
+            </div>
+          )}
+
+          {(inputMethod === "youtube" || inputMethod === "tiktok") && (
+            <div className="input-form">
+              <div className="form-row">
+                <label>{inputMethod === "youtube" ? "YouTube" : "TikTok / Instagram"} URL</label>
+                <input className="form-input" placeholder={`Paste ${inputMethod === "youtube" ? "YouTube" : "TikTok/Instagram"} link...`} />
+              </div>
+              <div className="info-box">⚠️ Content will be heavily transformed: new script, new narration, visual remixing, and overlays. Copyright-free results are not guaranteed.</div>
+            </div>
+          )}
+
+          <div className="btn-row">
+            <button className="btn-secondary" onClick={() => setStep(1)}>← Back</button>
+            <button className="btn-primary" disabled={!inputMethod} onClick={() => setStep(3)}>Continue →</button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div>
+          <h2 className="section-title">Review & Generate</h2>
+          <div className="review-grid">
+            <div className="card review-card">
+              <div className="review-item"><span>Format</span><strong>{videoType?.label}</strong></div>
+              <div className="review-item"><span>Aspect Ratio</span><strong>{videoType?.ratio}</strong></div>
+              <div className="review-item"><span>Input</span><strong>{inputMethod}</strong></div>
+              <div className="review-item"><span>Style</span><strong>{tone}</strong></div>
+              <div className="review-item"><span>Duration</span><strong>{duration}s</strong></div>
+              <div className="review-item"><span>Voice</span><strong>{voiceStyle}</strong></div>
+              <div className="review-item"><span>Language</span><strong>{language}</strong></div>
+            </div>
+            <div className="card ai-preview">
+              <div className="card-header"><h3>AI Will Generate</h3></div>
+              {["Script & Scene Breakdown","AI Voiceover","Stock Visuals","Animated Subtitles","Background Music","Transitions & Zooms","Thumbnail","SEO Package"].map(f=>(
+                <div key={f} className="feature-row"><span className="feature-check">✓</span>{f}</div>
+              ))}
+            </div>
+          </div>
+          <div className="legal-box">
+            📋 This platform does not guarantee copyright-free status for third-party content. Users are responsible for ensuring they have rights to use imported media.
+          </div>
+          <div className="btn-row">
+            <button className="btn-secondary" onClick={() => setStep(2)}>← Back</button>
+            <button className="btn-primary btn-generate" onClick={handleGenerate}>
+              <span>✦</span> Generate Video with AI
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Templates() {
+  return (
+    <div className="page-content visible">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Templates</h1>
+          <p className="page-sub">Battle-tested formats proven to go viral</p>
+        </div>
+      </div>
+      <div className="templates-grid">
+        {TEMPLATES.map(t => (
+          <div key={t.id} className="template-card">
+            <div className="template-thumb" style={{ background: `linear-gradient(135deg, ${t.color}22, ${t.color}44)`, borderColor: t.color+"44" }}>
+              <div className="template-emoji">{t.tag}</div>
+              <div className="template-views">{t.views} avg views</div>
+            </div>
+            <div className="template-body">
+              <div className="template-name">{t.name}</div>
+              <div className="template-style">{t.style}</div>
+              <button className="btn-primary btn-sm">Use Template</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Exports() {
+  return (
+    <div className="page-content visible">
+      <div className="page-header">
+        <h1 className="page-title">Exports</h1>
+      </div>
+      <div className="exports-list">
+        {[
+          { name: "UFC Highlights Reel", date: "May 19", size: "124 MB", format: "MP4 4K", platform: "Shorts" },
+          { name: "Top 10 AI Facts", date: "May 18", size: "87 MB", format: "MP4 1080p", platform: "TikTok" },
+          { name: "Finance Tips Vol.3", date: "May 17", size: "212 MB", format: "MP4 4K", platform: "YouTube" },
+          { name: "Motivation Monday", date: "May 16", size: "55 MB", format: "MP4 1080p", platform: "Reels" },
+        ].map((e, i) => (
+          <div key={i} className="export-row-item">
+            <div className="export-thumb">▶</div>
+            <div className="export-info">
+              <div className="export-name">{e.name}</div>
+              <div className="export-meta">{e.date} • {e.size} • {e.format}</div>
+            </div>
+            <span className="platform-tag">{e.platform}</span>
+            <button className="btn-secondary btn-sm">↓ Download</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Settings() {
+  return (
+    <div className="page-content visible">
+      <div className="page-header">
+        <h1 className="page-title">Settings</h1>
+      </div>
+      <div className="settings-grid">
+        {[
+          { section: "API Keys", fields: ["OpenAI API Key", "ElevenLabs Key", "Pexels Key", "Runway Key"] },
+          { section: "Export Defaults", fields: ["Default Resolution", "Default FPS", "Output Format"] },
+          { section: "Branding", fields: ["Watermark Text", "Watermark Position", "Logo Upload"] },
+          { section: "Voice Preferences", fields: ["Default Voice", "Default Language", "Pitch Adjustment"] },
+        ].map((s, i) => (
+          <div key={i} className="card settings-section">
+            <h3 className="settings-title">{s.section}</h3>
+            {s.fields.map(f => (
+              <div key={f} className="settings-field">
+                <label>{f}</label>
+                <input className="form-input" placeholder={`Enter ${f.toLowerCase()}...`} />
+              </div>
+            ))}
+            <button className="btn-primary btn-sm">Save</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Queue() {
+  return (
+    <div className="page-content visible">
+      <div className="page-header">
+        <h1 className="page-title">Rendering Queue</h1>
+        <span className="badge badge-active">3 Active</span>
+      </div>
+      <div className="queue-list">
+        {[
+          { name: "Sports Documentary Ep.4", progress: 72, eta: "2:34", status: "rendering" },
+          { name: "AI News: May 2024", progress: 31, eta: "8:12", status: "rendering" },
+          { name: "Motivation Compilation", progress: 0, eta: "Queued", status: "queued" },
+          { name: "UFC Best Moments", progress: 100, eta: "Done", status: "complete" },
+        ].map((q, i) => (
+          <div key={i} className="card queue-row">
+            <div className="queue-row-info">
+              <div className="queue-row-name">{q.name}</div>
+              <span className={`status-badge status-${q.status}`}>{q.status}</span>
+            </div>
+            <div className="queue-progress-row">
+              <div className="queue-progress-track">
+                <div className="queue-progress-fill" style={{ width: `${q.progress}%` }} />
+              </div>
+              <span>{q.progress}%</span>
+              <span className="queue-eta">{q.eta}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [active, setActive] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [plan] = useState("Pro");
+
+  const renderPage = () => {
+    switch (active) {
+      case "dashboard": return <Dashboard />;
+      case "create": return <CreateVideo onNavigate={setActive} />;
+      case "templates": return <Templates />;
+      case "exports": return <Exports />;
+      case "settings": return <Settings />;
+      case "queue": return <Queue />;
+      default: return (
+        <div className="page-content visible">
+          <div className="page-header"><h1 className="page-title">{NAV_ITEMS.find(n=>n.id===active)?.label}</h1></div>
+          <div className="coming-soon">
+            <div className="coming-icon">⬡</div>
+            <div className="coming-title">Coming Soon</div>
+            <div className="coming-sub">This section is being built. Stay tuned.</div>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #050508;
+          --bg2: #0a0a10;
+          --surface: #0f0f18;
+          --surface2: #141420;
+          --border: rgba(255,255,255,0.06);
+          --border2: rgba(255,255,255,0.1);
+          --text: #e8e8f0;
+          --muted: #6b6b80;
+          --accent: #a78bfa;
+          --accent2: #34d399;
+          --accent3: #60a5fa;
+          --glow: rgba(167,139,250,0.15);
+          --sidebar-w: 240px;
+        }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'Syne', sans-serif;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+
+        /* Particles */
+        .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .particle {
+          position: absolute;
+          width: 2px; height: 2px;
+          background: var(--accent);
+          border-radius: 50%;
+          opacity: 0;
+          animation: float linear infinite;
+        }
+        .particle:nth-child(odd) { background: var(--accent3); }
+        .particle:nth-child(3n) { background: var(--accent2); }
+        ${[...Array(18)].map((_, i) => `
+          .particle-${i} {
+            left: ${5 + i * 5.5}%;
+            top: ${Math.random() * 100}%;
+            animation-duration: ${8 + (i % 5) * 3}s;
+            animation-delay: ${(i % 7) * 1.2}s;
+            width: ${1 + (i % 3)}px;
+            height: ${1 + (i % 3)}px;
+            opacity: ${0.2 + (i % 4) * 0.1};
+          }
+        `).join("")}
+        @keyframes float {
+          0% { transform: translateY(100vh) scale(0); opacity: 0; }
+          10% { opacity: 0.6; }
+          90% { opacity: 0.3; }
+          100% { transform: translateY(-20px) scale(1.5); opacity: 0; }
+        }
+
+        /* Layout */
+        .app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+        /* Sidebar */
+        .sidebar {
+          width: var(--sidebar-w);
+          background: linear-gradient(180deg, #0c0c16 0%, #080810 100%);
+          border-right: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          top: 0; left: 0; bottom: 0;
+          z-index: 100;
+          transition: transform 0.3s ease;
+        }
+        .sidebar-logo {
+          padding: 28px 24px 20px;
+          border-bottom: 1px solid var(--border);
+        }
+        .logo-mark {
+          display: flex; align-items: center; gap: 10px;
+        }
+        .logo-icon {
+          width: 36px; height: 36px;
+          background: linear-gradient(135deg, var(--accent), var(--accent3));
+          border-radius: 10px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 16px;
+          box-shadow: 0 0 20px rgba(167,139,250,0.4);
+        }
+        .logo-text {
+          font-size: 18px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          background: linear-gradient(90deg, #fff, var(--accent));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+
+        .nav-section { padding: 16px 12px; flex: 1; overflow-y: auto; }
+        .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 8px 12px 4px; }
+
+        .nav-item {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 12px;
+          border-radius: 10px;
+          cursor: pointer;
+          color: var(--muted);
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s;
+          position: relative;
+          margin-bottom: 2px;
+        }
+        .nav-item:hover { color: var(--text); background: var(--surface); }
+        .nav-item.active {
+          color: var(--accent);
+          background: linear-gradient(90deg, rgba(167,139,250,0.12), transparent);
+          border: 1px solid rgba(167,139,250,0.15);
+        }
+        .nav-item.active::before {
+          content: '';
+          position: absolute;
+          left: 0; top: 20%; bottom: 20%;
+          width: 3px;
+          background: var(--accent);
+          border-radius: 0 2px 2px 0;
+        }
+        .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .sidebar-bottom {
+          padding: 16px;
+          border-top: 1px solid var(--border);
+        }
+        .user-card {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px;
+          background: var(--surface);
+          border-radius: 12px;
+          border: 1px solid var(--border);
+        }
+        .avatar {
+          width: 36px; height: 36px;
+          background: linear-gradient(135deg, var(--accent), var(--accent3));
+          border-radius: 10px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 14px; font-weight: 700;
+        }
+        .user-name { font-size: 13px; font-weight: 600; }
+        .user-plan { font-size: 10px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+
+        /* Main */
+        .main {
+          margin-left: var(--sidebar-w);
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+          height: 64px;
+          background: rgba(5,5,8,0.8);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid var(--border);
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 0 28px;
+          position: sticky; top: 0; z-index: 50;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .topbar-right { display: flex; align-items: center; gap: 12px; }
+        .credits-pill {
+          background: var(--surface);
+          border: 1px solid var(--border2);
+          border-radius: 20px;
+          padding: 6px 14px;
+          font-size: 12px;
+          display: flex; align-items: center; gap: 6px;
+        }
+        .credits-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+        .notif-btn {
+          width: 36px; height: 36px;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        /* Content */
+        .content { padding: 32px 28px; flex: 1; }
+
+        .page-content { opacity: 0; transform: translateY(12px); transition: all 0.4s ease; }
+        .page-content.visible { opacity: 1; transform: translateY(0); }
+
+        .page-header {
+          display: flex; align-items: flex-start; justify-content: space-between;
+          margin-bottom: 28px;
+          flex-wrap: wrap; gap: 16px;
+        }
+        .page-title {
+          font-size: 28px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          background: linear-gradient(90deg, #fff 0%, var(--accent) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .page-sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+        /* Buttons */
+        .btn-primary {
+          background: linear-gradient(135deg, var(--accent), #7c3aed);
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          font-family: 'Syne', sans-serif;
+          cursor: pointer;
+          display: inline-flex; align-items: center; gap: 8px;
+          transition: all 0.2s;
+          box-shadow: 0 4px 20px rgba(167,139,250,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(167,139,250,0.4); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+          background: var(--surface);
+          color: var(--text);
+          border: 1px solid var(--border2);
+          padding: 10px 20px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          font-family: 'Syne', sans-serif;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+        .btn-next, .btn-generate { margin-top: 24px; }
+        .btn-row { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+        /* Cards */
+        .card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 20px;
+        }
+        .card:hover { border-color: var(--border2); }
+        .card-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 16px;
+        }
+        .card-header h3 { font-size: 15px; font-weight: 700; }
+
+        .badge {
+          background: rgba(167,139,250,0.15);
+          color: var(--accent);
+          border: 1px solid rgba(167,139,250,0.3);
+          border-radius: 20px;
+          padding: 2px 10px;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+        }
+        .badge-active {
+          background: rgba(52,211,153,0.15);
+          color: var(--accent2);
+          border-color: rgba(52,211,153,0.3);
+        }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 20px;
+          position: relative;
+          overflow: hidden;
+          transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-glow {
+          position: absolute;
+          width: 80px; height: 80px;
+          border-radius: 50%;
+          opacity: 0.08;
+          top: -20px; right: -20px;
+          filter: blur(20px);
+        }
+        .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+        .stat-change { font-size: 12px; color: var(--muted); }
+        .change-up { color: var(--accent2); }
+
+        /* Dashboard grid */
+        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 16px; }
+
+        /* Project rows */
+        .project-row {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 10px 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .project-row:last-child { border-bottom: none; }
+        .project-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .project-meta { display: flex; gap: 8px; align-items: center; }
+        .platform-tag {
+          background: var(--surface2);
+          border: 1px solid var(--border2);
+          border-radius: 6px;
+          padding: 2px 8px;
+          font-size: 11px;
+          color: var(--muted);
+        }
+        .status-badge {
+          font-size: 10px;
+          padding: 2px 8px;
+          border-radius: 20px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .status-rendering { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .status-complete { background: rgba(52,211,153,0.15); color: var(--accent2); }
+        .status-queued { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+        .mini-progress { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+        .mini-fill { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 0.5s; }
+        .mini-progress > div { width: 60px; background: var(--border); border-radius: 2px; }
+
+        /* Progress bars */
+        .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .progress-label { font-size: 12px; color: var(--muted); width: 110px; flex-shrink: 0; }
+        .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+        .progress-val { font-size: 12px; color: var(--muted); width: 32px; text-align: right; }
+
+        /* Credits */
+        .credits-display { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .credits-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+        .credits-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+        .credits-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+        .credits-nums { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+        .credits-used { color: var(--accent); }
+
+        /* Queue */
+        .queue-item { margin-bottom: 12px; }
+        .queue-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+        .queue-time { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+        .queue-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .queue-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+
+        /* Steps indicator */
+        .steps-indicator { display: flex; gap: 8px; align-items: center; }
+        .step-dot {
+          width: 32px; height: 32px;
+          border-radius: 50%;
+          border: 2px solid var(--border2);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 13px; font-weight: 700;
+          color: var(--muted);
+          transition: all 0.3s;
+        }
+        .step-dot.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,0.1); }
+
+        /* Video Types */
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+        .type-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        .type-card {
+          background: var(--surface);
+          border: 2px solid var(--border);
+          border-radius: 14px;
+          padding: 20px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          position: relative;
+        }
+        .type-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+        .type-card.selected { border-color: var(--accent); background: rgba(167,139,250,0.06); }
+        .type-icon { font-size: 28px; margin-bottom: 8px; }
+        .type-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .type-ratio { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+        .type-check { position: absolute; top: 10px; right: 10px; color: var(--accent); font-size: 14px; }
+
+        /* Input Methods */
+        .input-methods { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .method-card {
+          background: var(--surface);
+          border: 2px solid var(--border);
+          border-radius: 12px;
+          padding: 14px 18px;
+          display: flex; align-items: center; gap: 14px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .method-card:hover { border-color: var(--border2); }
+        .method-card.selected { border-color: var(--accent); background: rgba(167,139,250,0.05); }
+        .method-icon { font-size: 20px; color: var(--accent); }
+        .method-name { font-size: 14px; font-weight: 700; }
+        .method-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .method-check { margin-left: auto; color: var(--accent); font-size: 16px; }
+
+        /* Form */
+        .input-form { margin-top: 16px; }
+        .form-row { margin-bottom: 16px; }
+        .form-row label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .form-input, .form-select, .form-textarea {
+          width: 100%;
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 11px 14px;
+          color: var(--text);
+          font-family: 'Syne', sans-serif;
+          font-size: 14px;
+          transition: border-color 0.2s;
+          outline: none;
+          resize: vertical;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-select { appearance: none; cursor: pointer; }
+
+        /* Upload */
+        .upload-zone {
+          border: 2px dashed var(--border2);
+          border-radius: 16px;
+          padding: 40px;
+          text-align: center;
+          margin: 16px 0;
+          transition: border-color 0.2s;
+        }
+        .upload-zone:hover { border-color: var(--accent); }
+        .upload-icon { font-size: 40px; margin-bottom: 12px; }
+        .upload-text { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .upload-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+        .info-box {
+          background: rgba(96,165,250,0.08);
+          border: 1px solid rgba(96,165,250,0.2);
+          border-radius: 10px;
+          padding: 12px 16px;
+          font-size: 13px;
+          color: var(--accent3);
+          line-height: 1.5;
+        }
+
+        /* Review */
+        .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .review-card { display: flex; flex-direction: column; gap: 0; }
+        .review-item {
+          display: flex; justify-content: space-between;
+          padding: 10px 0;
+          border-bottom: 1px solid var(--border);
+          font-size: 14px;
+        }
+        .review-item:last-child { border-bottom: none; }
+        .review-item span { color: var(--muted); }
+        .review-item strong { font-weight: 700; }
+
+        .feature-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; }
+        .feature-check { color: var(--accent2); font-weight: 700; }
+
+        .legal-box {
+          background: rgba(255,100,50,0.06);
+          border: 1px solid rgba(255,100,50,0.2);
+          border-radius: 10px;
+          padding: 12px 16px;
+          font-size: 12px;
+          color: #f87171;
+          margin-bottom: 16px;
+          line-height: 1.5;
+        }
+
+        /* Generating */
+        .generating-screen {
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          min-height: 70vh;
+          text-align: center;
+        }
+        .gen-orb {
+          width: 120px; height: 120px;
+          border-radius: 50%;
+          background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+          animation: pulse 2s ease-in-out infinite;
+          margin-bottom: 32px;
+          box-shadow: 0 0 60px rgba(167,139,250,0.5);
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.2); opacity: 1; }
+        }
+        .gen-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+        .gen-stage { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+        .gen-progress-track {
+          width: 400px; max-width: 90vw;
+          height: 8px;
+          background: var(--border);
+          border-radius: 4px;
+          overflow: hidden;
+          margin-bottom: 8px;
+        }
+        .gen-progress-fill {
+          height: 100%;
+          border-radius: 4px;
+          background: linear-gradient(90deg, var(--accent), var(--accent3), var(--accent2));
+          transition: width 0.5s ease;
+        }
+        .gen-percent { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 32px; }
+        .gen-steps { display: flex; flex-direction: column; gap: 6px; width: 300px; text-align: left; }
+        .gen-step {
+          display: flex; align-items: center; gap: 10px;
+          font-size: 13px; color: var(--muted);
+          transition: color 0.3s;
+        }
+        .gen-step.done { color: var(--accent2); }
+        .gen-dot {
+          width: 8px; height: 8px;
+          border-radius: 50%;
+          background: var(--border);
+          flex-shrink: 0;
+          transition: background 0.3s;
+        }
+        .gen-step.done .gen-dot { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+
+        /* Result */
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .result-grid .seo-card { grid-column: 1 / -1; }
+        .video-preview-box {
+          background: #000;
+          border-radius: 12px;
+          aspect-ratio: 9/16;
+          max-height: 400px;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          position: relative;
+          overflow: hidden;
+          margin-bottom: 16px;
+        }
+        .video-preview-inner { text-align: center; }
+        .preview-play { font-size: 40px; margin-bottom: 8px; opacity: 0.6; }
+        .preview-label { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .preview-duration { font-size: 12px; color: var(--muted); }
+        .preview-scenes { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 12px; }
+        .scene-thumb { display: flex; align-items: center; gap: 8px; }
+        .scene-num { font-size: 11px; color: var(--muted); width: 52px; }
+        .scene-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+        .scene-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+
+        .script-output {
+          background: var(--bg2);
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 16px;
+          font-size: 13px;
+          line-height: 1.7;
+          font-family: 'Space Mono', monospace;
+          white-space: pre-wrap;
+          max-height: 280px;
+          overflow-y: auto;
+          margin-bottom: 16px;
+          color: #c4c4d4;
+        }
+
+        .export-options { display: flex; flex-direction: column; gap: 10px; }
+        .export-row { display: flex; align-items: center; justify-content: space-between; }
+        .export-row span { font-size: 12px; color: var(--muted); }
+        .select-row { display: flex; gap: 6px; }
+        .fmt-btn {
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 4px 10px;
+          font-size: 11px;
+          font-family: 'Syne', sans-serif;
+          color: var(--text);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .fmt-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        .seo-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .seo-item:last-child { border-bottom: none; }
+        .seo-key { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .seo-val { font-size: 14px; font-weight: 600; }
+        .tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .tag { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); border-radius: 20px; padding: 2px 10px; font-size: 11px; color: var(--accent); }
+        .hook-score { font-size: 22px; font-weight: 800; color: #f59e0b; }
+
+        /* Templates */
+        .templates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .template-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          overflow: hidden;
+          transition: transform 0.2s;
+        }
+        .template-card:hover { transform: translateY(-3px); }
+        .template-thumb {
+          height: 140px;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          border-bottom: 1px solid var(--border);
+        }
+        .template-emoji { font-size: 48px; margin-bottom: 8px; }
+        .template-views { font-size: 11px; color: var(--muted); }
+        .template-body { padding: 16px; }
+        .template-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .template-style { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+        /* Exports */
+        .exports-list { display: flex; flex-direction: column; gap: 12px; }
+        .export-row-item {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 16px 20px;
+          display: flex; align-items: center; gap: 16px;
+          transition: border-color 0.2s;
+        }
+        .export-row-item:hover { border-color: var(--border2); }
+        .export-thumb {
+          width: 44px; height: 44px;
+          background: var(--surface2);
+          border-radius: 10px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 16px;
+          flex-shrink: 0;
+        }
+        .export-info { flex: 1; }
+        .export-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .export-meta { font-size: 12px; color: var(--muted); }
+
+        /* Settings */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .settings-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+        .settings-field { margin-bottom: 12px; }
+        .settings-field label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+        /* Queue page */
+        .queue-list { display: flex; flex-direction: column; gap: 12px; }
+        .queue-row { }
+        .queue-row-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .queue-row-name { font-size: 15px; font-weight: 700; }
+        .queue-progress-row { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+        .queue-progress-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+        .queue-progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+        .queue-eta { font-family: 'Space Mono', monospace; font-size: 12px; }
+
+        /* Coming soon */
+        .coming-soon { text-align: center; padding: 80px 20px; }
+        .coming-icon { font-size: 60px; margin-bottom: 16px; opacity: 0.4; }
+        .coming-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: var(--muted); }
+        .coming-sub { font-size: 14px; color: var(--muted); }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+          .stats-grid { grid-template-columns: 1fr 1fr; }
+          .dashboard-grid { grid-template-columns: 1fr 1fr; }
+          .queue-card { grid-column: 1 / -1; }
+        }
+        @media (max-width: 768px) {
+          :root { --sidebar-w: 0px; }
+          .sidebar { transform: translateX(-240px); width: 240px; }
+          .sidebar.open { transform: translateX(0); }
+          .main { margin-left: 0; }
+          .stats-grid { grid-template-columns: 1fr 1fr; }
+          .dashboard-grid { grid-template-columns: 1fr; }
+          .type-grid { grid-template-columns: 1fr 1fr; }
+          .result-grid { grid-template-columns: 1fr; }
+          .review-grid { grid-template-columns: 1fr; }
+          .settings-grid { grid-template-columns: 1fr; }
+          .templates-grid { grid-template-columns: 1fr 1fr; }
+          .form-grid-2 { grid-template-columns: 1fr; }
+          .content { padding: 20px 16px; }
+        }
+        @media (max-width: 480px) {
+          .stats-grid { grid-template-columns: 1fr; }
+          .type-grid { grid-template-columns: 1fr; }
+          .templates-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div className="app">
+        <Particles />
+
+        <nav className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+          <div className="sidebar-logo">
+            <div className="logo-mark">
+              <div className="logo-icon">✦</div>
+              <div>
+                <div className="logo-text">VidForge AI</div>
+                <div className="logo-sub">Video Automation</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="nav-section">
+            <div className="nav-label">Main</div>
+            {NAV_ITEMS.slice(0, 2).map(item => (
+              <div key={item.id} className={`nav-item ${active === item.id ? "active" : ""}`}
+                onClick={() => setActive(item.id)}>
+                <span className="nav-icon">{item.icon}</span>
+                {item.label}
+              </div>
+            ))}
+            <div className="nav-label" style={{ marginTop: 12 }}>Content</div>
+            {NAV_ITEMS.slice(2, 6).map(item => (
+              <div key={item.id} className={`nav-item ${active === item.id ? "active" : ""}`}
+                onClick={() => setActive(item.id)}>
+                <span className="nav-icon">{item.icon}</span>
+                {item.label}
+              </div>
+            ))}
+            <div className="nav-label" style={{ marginTop: 12 }}>System</div>
+            {NAV_ITEMS.slice(6).map(item => (
+              <div key={item.id} className={`nav-item ${active === item.id ? "active" : ""}`}
+                onClick={() => setActive(item.id)}>
+                <span className="nav-icon">{item.icon}</span>
+                {item.label}
+              </div>
+            ))}
+          </div>
+
+          <div className="sidebar-bottom">
+            <div className="user-card">
+              <div className="avatar">JD</div>
+              <div>
+                <div className="user-name">John Doe</div>
+                <div className="user-plan">{plan} Plan</div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="main">
+          <header className="topbar">
+            <div className="topbar-left">
+              <button className="notif-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
+              <span style={{ fontSize: 13, color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ color: "var(--accent)" }}>VidForge</span>
+                <span>/ {NAV_ITEMS.find(n => n.id === active)?.label}</span>
+              </span>
+            </div>
+            <div className="topbar-right">
+              <div className="credits-pill">
+                <span className="credits-dot" />
+                <span style={{ fontWeight: 700, color: "var(--accent2)" }}>3,350</span>
+                <span style={{ color: "var(--muted)" }}>credits</span>
+              </div>
+              <div className="notif-btn">🔔</div>
+              <div className="avatar" style={{ width: 36, height: 36, borderRadius: 10, cursor: "pointer" }}>JD</div>
+            </div>
+          </header>
+
+          <div className="content">
+            {renderPage()}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
